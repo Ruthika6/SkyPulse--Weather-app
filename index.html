@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkyPulse — Weather</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body data-sky="day">
+  <div class="atmosphere" id="atmosphere">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <canvas id="particles" class="particles"></canvas>
+  </div>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="logo">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <circle cx="14" cy="14" r="13" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M7 14c0-3.86 3.13-7 7-7s7 3.14 7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M4 17h20M14 7v-3M7.5 10L5 8M20.5 10L23 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span>Stratos</span>
+      </div>
+      <div class="search-group">
+        <div class="search-box">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M10 10l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <input type="text" id="searchInput" placeholder="City, country…" autocomplete="off" spellcheck="false" />
+          <button class="clear-btn" id="clearBtn" aria-label="Clear">✕</button>
+        </div>
+        <div class="suggestions" id="suggestions"></div>
+        <button class="loc-btn" id="locBtn">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <circle cx="7" cy="6" r="2.5" stroke="currentColor" stroke-width="1.4"/>
+            <path d="M7 1v1.5M7 9.5V11M1 6h1.5M9.5 6H11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            <path d="M7 10c0 0 4 2 4 0s-8 0-8 0 0 2 4 0z" fill="currentColor" opacity=".5"/>
+          </svg>
+          Use my location
+        </button>
+      </div>
+      <div class="unit-row">
+        <button class="unit-btn active" data-unit="C">°C</button>
+        <div class="unit-divider"></div>
+        <button class="unit-btn" data-unit="F">°F</button>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-btn active" data-view="today">Today</button>
+        <button class="nav-btn" data-view="forecast">7-Day</button>
+        <button class="nav-btn" data-view="hourly">Hourly</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span>Open-Meteo · OSM</span>
+        <span>No API key needed</span>
+      </div>
+    </aside>
+      <div class="state-loading" id="stateLoading">
+        <div class="loader-ring"></div>
+        <p>Fetching weather…</p>
+      </div>
+
+      <div class="state-error" id="stateError">
+        <div class="error-icon">⚡</div>
+        <h3 id="errorTitle">Something went wrong</h3>
+        <p id="errorMsg">Try searching for a different city.</p>
+        <button class="btn-retry" id="retryBtn">Try again</button>
+      </div>
+
+      <div class="state-empty" id="stateEmpty">
+        <div class="empty-art">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none" opacity=".4">
+            <circle cx="40" cy="40" r="38" stroke="currentColor" stroke-width="1.5" stroke-dasharray="6 4"/>
+            <path d="M20 48c0-8.28 6.72-15 15-15 1.15 0 2.27.13 3.35.38A10 10 0 0 1 55 43v.5A7.5 7.5 0 0 1 47.5 51h-22A5.5 5.5 0 0 1 20 45.5" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <p>Search a city to see weather</p>
+      </div>
+
+      <!-- Today view -->
+      <div class="view view-today" id="viewToday">
+
+        <div class="hero-row">
+          <div class="hero-left">
+            <div class="city-chip" id="cityChip">
+              <span class="city-dot"></span>
+              <span id="cityLabel">—</span>
+            </div>
+            <div class="hero-temp" id="heroTemp">—</div>
+            <div class="hero-desc" id="heroDesc">—</div>
+            <div class="hero-feels" id="heroFeels">—</div>
+          </div>
+          <div class="hero-right">
+            <div class="weather-art" id="weatherArt">☀️</div>
+            <div class="hi-lo" id="hiLo">—</div>
+          </div>
+        </div>
+
+        <div class="stats-grid" id="statsGrid">
+        </div>
+
+        <div class="aqi-bar-wrap" id="aqiWrap" style="display:none">
+          <div class="section-label">Air Quality</div>
+          <div class="aqi-row">
+            <div class="aqi-num" id="aqiNum">—</div>
+            <div class="aqi-label" id="aqiLabel">—</div>
+            <div class="aqi-track">
+              <div class="aqi-fill" id="aqiFill"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="view view-hourly" id="viewHourly">
+        <div class="section-label">24-hour forecast</div>
+        <div class="hourly-grid" id="hourlyGrid"></div>
+      <div class="view view-forecast" id="viewForecast">
+        <div class="section-label">7-day forecast</div>
+        <div class="forecast-list" id="forecastList"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
